@@ -5,13 +5,20 @@ from setuptools import find_packages
 print(find_packages())
 
 setup(
-    name="taxipred",
-    version="0.0.1",
+    # namn på paketet
+    name="taxipred",  
+    # pakektets version  
+    version="0.0.1",   
+    # beskrivning av vad paketet innehåller, samt vem som skapat det 
     description="this package contains taxipred app",
-    author="Kokchun Giang",
-    author_email="author@mail.se",
-    install_requires=["streamlit", "pandas", "fastapi", "uvicorn"],
-    package_dir={"": "src"},
-    package_data={"taxipred": ["data/*.csv"]},
-    packages=find_packages(),
+    author="Pontus Ågren Grundström",
+    author_email="pontus.agrengrundstrom@gmail.com",
+    # paket som installeras automatiskt när man install taxipred. (dependencies för taxipred paketet)
+    install_requires=["streamlit", "pandas", "fastapi", "uvicorn", "pydantic"],     
+    # berättar att paketet 'taxipred' ligger i mappen src, för att setup inte ska leta efter taxipred i rooten där setup.py filen finns, alltså src/taxipred/
+    package_dir={"": "src"},    
+    # inkluderar filer som inte är .py filer, i detta fall, alla .csv filer som finns i src/taxipred/data, dessa filer följer med i paketet vid installation
+    package_data={"taxipred": ["data/*.csv"]},  
+    # letar efter paket genom att kolla efter mappar med __init__.py 
+    packages=find_packages(),   
 )
