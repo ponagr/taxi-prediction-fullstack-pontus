@@ -5,7 +5,7 @@ Taxi Prediction is a full-stack application that combines machine learning, back
 
 #### Steps:
 **1. model:**
-- [ ] EDA, cleaning and normalizing data
+- [x] EDA, cleaning and normalizing data
 - [ ] Evaluating different ML models and selecting the model with best performance
 - [ ] Training and exporting the best ML model
 
