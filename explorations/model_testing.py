@@ -1,3 +1,4 @@
+from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neighbors import KNeighborsRegressor
@@ -8,18 +9,6 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error, root_mean_squared_error
 import pandas as pd
 
-# models = {
-#     "LinearRegression": LinearRegression(),
-#     "RandomForest": RandomForestRegressor(),
-#     "KNN": KNeighborsRegressor(n_neighbors=best_k),
-#     "XGBoost": XGBRegressor(),
-#     "RidgeCV": RidgeCV(),
-#     "ElasticNet": ElasticNetCV()
-# }
-# scalers = {
-#     "StandardScaler": StandardScaler(), 
-#     "MinMaxScaler": MinMaxScaler()
-#     }
 
 def find_best_k(scaled_X_train, scaled_X_val, y_train, y_val):
     error_list = []
@@ -35,7 +24,22 @@ def find_best_k(scaled_X_train, scaled_X_val, y_train, y_val):
     
     return best_k
 
-def test_models(X_train, X_test, X_val, y_train, y_val, models, scalers = {"StandardScaler": StandardScaler(), "MinMaxScaler": MinMaxScaler()}):
+def test_models(df, target, test_size=0.2,
+                models = {
+                    "LinearRegression": LinearRegression(),
+                    "RandomForestRegressor": RandomForestRegressor(),
+                    "KNeighborsRegressor": KNeighborsRegressor(),
+                    "XGBRegressor": XGBRegressor(),
+                    "RidgeCV": RidgeCV(),
+                    "ElasticNetCV": ElasticNetCV()
+                    }, 
+                scalers = {
+                    "StandardScaler": StandardScaler(), 
+                    "MinMaxScaler": MinMaxScaler()
+                    }):
+    
+    X, y = df.drop(columns=[target]), df[target]
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=test_size, random_state=42)
     
     result = []
     for key, model in models.items():
@@ -43,11 +47,11 @@ def test_models(X_train, X_test, X_val, y_train, y_val, models, scalers = {"Stan
             scaler.fit(X_train)
 
             scaled_X_train = scaler.transform(X_train)
-            scaled_X_test = scaler.transform(X_test)
             scaled_X_val = scaler.transform(X_val)
             
-            
-            best_k = find_best_k(scaled_X_train, scaled_X_val, y_train, y_val)
+            if model == KNeighborsRegressor():
+                best_k = find_best_k(scaled_X_train, scaled_X_val, y_train, y_val)
+                model = KNeighborsRegressor(n_neighbors=best_k)
             
             model.fit(scaled_X_train, y_train)
             y_pred = model.predict(scaled_X_val)
@@ -63,6 +67,6 @@ def test_models(X_train, X_test, X_val, y_train, y_val, models, scalers = {"Stan
                 "mse": mse,
                 "rmse": rmse
             })
-
     result_df = pd.DataFrame(result)
+    
     return result_df.sort_values(by="rmse")
