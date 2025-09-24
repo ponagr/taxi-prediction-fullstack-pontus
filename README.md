@@ -6,13 +6,13 @@ Taxi Prediction is a full-stack application that combines machine learning, back
 #### Steps:
 **1. model:**
 - [x] EDA, cleaning and normalizing data
-- [ ] Evaluating different ML models and selecting the model with best performance
-- [ ] Training and exporting the best ML model
+- [x] Evaluating different ML models and selecting the model with best performance
+- [x] Training and exporting the best ML model
 
 **2. backend:**
-- [ ] Creating API layer with endpoints to the ML model and data
-- [ ] Validating input and output with pydantic
+- [x] Creating API layer with endpoints to the ML model and data
+- [x] Validating input and output with pydantic
 
 **3. frontend:**
-- [ ] Connect streamlit dashboard to the API
-- [ ] Take input and use the exported ML model to predict taxi prices
+- [x] Connect streamlit dashboard to the API
+- [x] Take input and use the exported ML model to predict taxi prices
