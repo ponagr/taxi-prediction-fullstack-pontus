@@ -8,6 +8,9 @@ from pydantic import BaseModel, Field
 # TODO: göra om passenger count till int?
 # TODO: lägga in datan med missing values på Taxi_Price för att kunna klicka på och fylla värden från dashboarden
 # TODO: lägga till upphämtningsplats och avlämningsplats, koppla till nån api för maps, och automatiskt fylla i uppskattad distance och duration, endast fylla i rate per min/km, base fare och antal passagerare 
+# TODO: dashboard page för kund och för företag(där man vill maximera profit)
+# TODO: räkna ut procent score för model prediction, med rmse delat på medelvärde på nått sätt?
+# TODO: tvätta datan med lite mer random diff på mean och median
 
 class TaxiData:
     def __init__(self):
