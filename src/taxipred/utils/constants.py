@@ -1,4 +1,6 @@
 from importlib.resources import files
+from dotenv import load_dotenv
+import os
 
 # 'files' tar namnet för paketet (vi har satt name="taxipred" i setup.py)
 # får tillbaka ett resource-träd med alla filer i paketet (Traversable)
@@ -13,6 +15,11 @@ TAXI_CSV_PATH = files("taxipred").joinpath("data/taxi_trip_pricing_cleaned_no_ca
 
 # MODEL PATHS
 # TAXI_REGRESSOR_MODEL_WITH_CATEGORICAL_FEATURES = files("taxipred").joinpath("models/taxi_regressor_categorical.joblib")
-MODEL_PATH = files("taxipred").joinpath("models/taxi_regressor.joblib")
+TAXI_MODEL_PATH = files("taxipred").joinpath("models/taxi_regressor.joblib")
+FEATURE_MODEL_PATH = files("taxipred").joinpath("models/feature_price_multiregressor.joblib")
 
+
+# API KEY
+load_dotenv()
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API")
 # DATA_PATH = Path(__file__).parents[1] / "data"

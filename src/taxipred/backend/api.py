@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from taxipred.utils.constants import MODEL_PATH
+from taxipred.utils.constants import TAXI_MODEL_PATH
 from taxipred.backend.data_processing import TaxiData, PredictionResponse, TaxiInput
 import pandas as pd
 import joblib
@@ -21,7 +21,7 @@ async def read_taxi_data():
 @app.post("/taxi/predict", response_model=PredictionResponse)
 async def predict_taxi_price(payload: TaxiInput):
     data_to_predict = pd.DataFrame([payload.model_dump()])
-    model = joblib.load(MODEL_PATH)
+    model = joblib.load(TAXI_MODEL_PATH)
     prediction = model.predict(data_to_predict)
     
     return {"Predicted_Price": prediction[0]}
