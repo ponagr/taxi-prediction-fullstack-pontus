@@ -22,4 +22,5 @@ FEATURE_MODEL_PATH = files("taxipred").joinpath("models/feature_price_multiregre
 # API KEY
 load_dotenv()
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API")
+WEATHER_API_KEY = os.getenv("WEATHER_API")
 # DATA_PATH = Path(__file__).parents[1] / "data"
