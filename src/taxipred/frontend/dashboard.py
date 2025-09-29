@@ -1,10 +1,8 @@
 import streamlit as st
-import streamlit.components.v1 as components
-from taxipred.utils.helpers import read_api_endpoint, taxi_prediction_endpoint
+from taxipred.utils.helpers import read_api_endpoint, taxi_prediction_endpoint, autocomplete_addresses, get_travel_route, get_weather
 import pandas as pd
-from taxipred.utils.constants import FEATURE_MODEL_PATH, GOOGLE_MAPS_API_KEY
+from taxipred.utils.constants import FEATURE_MODEL_PATH
 import joblib
-import requests
 import datetime
 
 st.set_page_config(layout="wide", page_title="Taxi Prediction Dashboard")
@@ -20,6 +18,9 @@ df = pd.DataFrame(data.json())
 # TODO: kan man träna en modell på att predicta base_fare, per_km_rate och per_minute_rate baserat på dom kategoriska kolumnerna?
 # TODO: pydantic model för validering och api call för att predicta base fare, km och min rate
 # TODO: bättre att klassificera categorical labels mot base fare, km rate och minute rate istället?
+# TODO: 4 hours, ta bort hours, och gör 4*60 för att göra till minuter, plussa med mins, gör detta för duration och duration_in traffic
+# TODO: lägg till gräns för datum
+# TODO: lägg till page för kund och page för företag, med enklare färdiga val via knappar utan apis
 
 def main():
     st.markdown("# Taxi Prediction Dashboard")
@@ -71,145 +72,111 @@ def predict_rates():
 
 def test():
     # karta här för att hitta adresser?
-    
+    # with st.form("Taxi fare data"):
     cols = st.columns(3)
     
     with cols[0]:
         # välj dag
         day = st.date_input("Day")
-        # st.write(day)
-
-        Day_of_Week_Weekend = 1
-        if day.isoweekday() < 6:
-            Day_of_Week_Weekend = 0
-        # st.write(Day_of_Week_Weekend)
         
         # välj upphämntningstid
         time = st.time_input("Pickup time")
-        # st.write(time)
         
-        Time_of_Day_Evening = 0
-        Time_of_Day_Morning = 0
-        Time_of_Day_Night = 0
-        if 6 < time.hour < 12:
-            Time_of_Day_Morning = 1
-        if 18 < time.hour < 24:
-            Time_of_Day_Evening = 1
-        if time.hour < 6:
-            Time_of_Day_Night = 1
-        # st.write(Time_of_Day_Night, Time_of_Day_Evening, Time_of_Day_Morning)
+        Passenger_Count = st.slider("Number of passengers", min_value=1, max_value=4, value=2, step=1)
+
+        pickup_datetime = datetime.datetime.combine(day, time)
+        pickup_timestamp = int(pickup_datetime.timestamp())
+        
             
     with cols[1]:
         # välj upphämntningsplats
-        query = st.text_input("Search pickup adress") 
+        pickup_query = st.text_input("Search pickup adress") 
 
-        url = (
-            f"https://maps.googleapis.com/maps/api/place/autocomplete/json"
-            f"?input={query}"
-            f"&types=address"
-            f"&components=country:se"
-            f"&key={GOOGLE_MAPS_API_KEY}"
-        )
-
-        response = requests.get(url)
-        data = response.json()
-
-        predictions = [p["description"] for p in data.get("predictions", [])]
-        pickup = st.selectbox("Choose pickup adress", predictions)
+        pickup_addresses = autocomplete_addresses(pickup_query)
+        pickup = st.selectbox("Choose pickup adress", pickup_addresses)
 
     with cols[2]:
         # välj avlämningsplats
-        query2 = st.text_input("Search drop off adress")
+        dropoff_query = st.text_input("Search drop off adress")
 
-        url = (
-            f"https://maps.googleapis.com/maps/api/place/autocomplete/json"
-            f"?input={query2}"
-            f"&types=address"
-            f"&components=country:se"
-            f"&key={GOOGLE_MAPS_API_KEY}"
-        )
-
-        response2 = requests.get(url)
-        data = response2.json()
-
-        predictions2 = [p["description"] for p in data.get("predictions", [])]
-        dropoff = st.selectbox("Choose drop off adress", predictions2)        
-
+        dropoff_addresses = autocomplete_addresses(dropoff_query)
+        dropoff = st.selectbox("Choose drop off adress", dropoff_addresses)
     
-    # hämta väder från väder api
-    # weather = requests.get()  - skicka med datum och tid?
+    st.write(dropoff)
+    # response = requests.get(f"https://api.openweathermap.org/data/2.5/forecast?q=Hägersten,se&appid={WEATHER_API_KEY}&units=metric")
     
-    # lägg till knapp
-    # hämta traffic conditions, trip distance och trip duration från maps api
     if pickup and dropoff:
-        pickup_datetime = datetime.datetime.combine(day, time)
-        departure_timestamp = int(pickup_datetime.timestamp())
-        
-        # traffic, distance, duration = requests.get()  - skicka med datum och tid?
-        response = requests.get(f"https://maps.googleapis.com/maps/api/directions/json?origin={pickup}&destination={dropoff}&departure_time={departure_timestamp}&key={GOOGLE_MAPS_API_KEY}")
-        st.write(response.json())
-        legs = response.json()["routes"][0]["legs"][0]
-        distance = legs["distance"]["text"].strip(" km")
-        duration = legs["duration"]["text"].strip(" mins")
-        st.write(float(distance), float(duration))
+        # response = requests.get(f"https://maps.googleapis.com/maps/api/directions/json?origin={pickup}&destination={dropoff}&departure_time={pickup_timestamp}&key={GOOGLE_MAPS_API_KEY}")
+        # legs = response.json()["routes"][0]["legs"][0]
+        # end_address = legs["end_address"]
+        # legs = response.json()["routes"][0]["legs"][0]
+        # st.write(end_address.split(", ")[1])
+        # submitted = st.form_submit_button("PREDICT")
+        # if submitted:
+        distance, duration, traffic, end_address = get_travel_route(pickup, dropoff, pickup_timestamp)
+        weather = get_weather(pickup_timestamp, end_address)
+        st.write(weather)
+        #     payload = {
+        #         "Time_of_Day_Evening": 1 if 18 < time.hour < 24 else 0,
+        #         "Time_of_Day_Morning": 1 if 6 < time.hour < 12 else 0,
+        #         "Time_of_Day_Night": 1 if time.hour < 6 else 0,
+        #         "Day_of_Week_Weekend": 0 if day.isoweekday() < 6 else 1,
+        #         "Traffic_Conditions_Low": 1 if traffic == "Low" else 0,     
+        #         "Traffic_Conditions_Medium": 1 if traffic == "Medium" else 0,
+        #         "Weather_Rain": 1 if weather == "Rain" else 0,
+        #         "Weather_Snow": 1 if weather == "Snow" else 0
+        #     }
+        #     # predicta med denna payload, skriv sedan ut priser osv med nästa prediction
+        #     st.write(payload)
+
     
         # skicka in payload till model
         
-        # payload = {
-        #     "Time_of_Day_Evening": 1 if 18 < time.hour < 24 else 0,
-        #     "Time_of_Day_Morning": 1 if 6 < time.hour < 12 else 0,
-        #     "Time_of_Day_Night": 1 if time.hour < 6 else 0,
-        #     "Day_of_Week_Weekend": 0 if day.isoweekday() < 6 else 1,
-        #     "Traffic_Conditions_Low": 1 if traffic == "Low" else 0,     # om 
-        #     "Traffic_Conditions_Medium": 1 if traffic == "Medium" else 0,
-        #     "Weather_Rain": 1 if weather == "Rain" else 0,
-        #     "Weather_Snow": 1 if weather == "Snow" else 0
-        # }
 
     
     
     
-    with st.form("Taxi fare data"):
-        # konverterar fram och tillbaka direkt i dashboard
-        # för att slippa ändra mer i data cleaning och träna om modell på nya datan 
-        # och ändra alla min och max värden i pydantic och dashboarden
-        usd_to_sek = 9.40   # 1 usd = 9.40 kr
-        sek_to_usd = 1 / usd_to_sek   
+    # with st.form("Taxi fare data"):
+    #     # konverterar fram och tillbaka direkt i dashboard
+    #     # för att slippa ändra mer i data cleaning och träna om modell på nya datan 
+    #     # och ändra alla min och max värden i pydantic och dashboarden
+    #     usd_to_sek = 9.40   # 1 usd = 9.40 kr
+    #     sek_to_usd = 1 / usd_to_sek   
         
-        # Time_of_Day_Evening, Time_of_Day_Morning, Time_of_Day_Night = st.checkbox()
-        # Time_of_Day_Evening	Time_of_Day_Morning	Time_of_Day_Night	Day_of_Week_Weekend	Traffic_Conditions_Low	Traffic_Conditions_Medium	Weather_Rain	Weather_Snow
+    #     # Time_of_Day_Evening, Time_of_Day_Morning, Time_of_Day_Night = st.checkbox()
+    #     # Time_of_Day_Evening	Time_of_Day_Morning	Time_of_Day_Night	Day_of_Week_Weekend	Traffic_Conditions_Low	Traffic_Conditions_Medium	Weather_Rain	Weather_Snow
         
-        # Time_of_Day based on pickup time
-        # 
+    #     # Time_of_Day based on pickup time
+    #     # 
         
         
-        Passenger_Count = st.number_input("Number of passengers", min_value=1, max_value=4, value=2, step=1)
+    #     Passenger_Count = st.number_input("Number of passengers", min_value=1, max_value=4, value=2, step=1)
         
-        Base_Fare = st.number_input("Base fare (SEK)", min_value=2.0*usd_to_sek, max_value=5.0*usd_to_sek, value=3.5*usd_to_sek, step=0.1)*sek_to_usd
+    #     Base_Fare = st.number_input("Base fare (SEK)", min_value=2.0*usd_to_sek, max_value=5.0*usd_to_sek, value=3.5*usd_to_sek, step=0.1)*sek_to_usd
         
-        Per_Km_Rate = st.number_input("Km rate (SEK)", min_value=0.5*usd_to_sek, max_value=2.0*usd_to_sek, value=1.2*usd_to_sek, step=0.1)*sek_to_usd
+    #     Per_Km_Rate = st.number_input("Km rate (SEK)", min_value=0.5*usd_to_sek, max_value=2.0*usd_to_sek, value=1.2*usd_to_sek, step=0.1)*sek_to_usd
         
-        Trip_Distance_km = st.number_input("Trip distance (km)", min_value=1.2, max_value=50.0, value=20.0, step=0.1)
+    #     Trip_Distance_km = st.number_input("Trip distance (km)", min_value=1.2, max_value=50.0, value=20.0, step=0.1)
         
-        Per_Minute_Rate = st.number_input("Minute rate (SEK)", min_value=0.1*usd_to_sek, max_value=0.5*usd_to_sek, value=0.29*usd_to_sek, step=0.01)*sek_to_usd
+    #     Per_Minute_Rate = st.number_input("Minute rate (SEK)", min_value=0.1*usd_to_sek, max_value=0.5*usd_to_sek, value=0.29*usd_to_sek, step=0.01)*sek_to_usd
         
-        Trip_Duration_Minutes = st.number_input("Trip duration (minutes)", min_value=5.0, max_value=120.0, value=50.0, step=1.0)
+    #     Trip_Duration_Minutes = st.number_input("Trip duration (minutes)", min_value=5.0, max_value=120.0, value=50.0, step=1.0)
 
 
-        submitted = st.form_submit_button("PREDICT")
+    #     submitted = st.form_submit_button("PREDICT")
 
-    if submitted:
-        payload = {
-            "Trip_Distance_km": float(Trip_Distance_km),
-            "Passenger_Count": float(Passenger_Count),
-            "Base_Fare": float(Base_Fare),
-            "Per_Km_Rate": float(Per_Km_Rate),
-            "Per_Minute_Rate": float(Per_Minute_Rate),
-            "Trip_Duration_Minutes": float(Trip_Duration_Minutes),
-        }
-        response = taxi_prediction_endpoint(payload).json()
-        taxi_price = response.get("Predicted_Price")*usd_to_sek
-        st.markdown(f"Predicted taxi price is {taxi_price:.2f} SEK")
+    # if submitted:
+    #     payload = {
+    #         "Trip_Distance_km": float(Trip_Distance_km),
+    #         "Passenger_Count": float(Passenger_Count),
+    #         "Base_Fare": float(Base_Fare),
+    #         "Per_Km_Rate": float(Per_Km_Rate),
+    #         "Per_Minute_Rate": float(Per_Minute_Rate),
+    #         "Trip_Duration_Minutes": float(Trip_Duration_Minutes),
+    #     }
+    #     response = taxi_prediction_endpoint(payload).json()
+    #     taxi_price = response.get("Predicted_Price")*usd_to_sek
+    #     st.markdown(f"Predicted taxi price is {taxi_price:.2f} SEK")
 
 
 if __name__ == "__main__":
