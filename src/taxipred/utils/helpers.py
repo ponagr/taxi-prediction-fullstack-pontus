@@ -15,7 +15,7 @@ def read_api_endpoint(endpoint = "/", base_url = "http://127.0.0.1:8000"):
 
 # TODO:
 # post_api_endpoint
-def taxi_prediction_endpoint(payload, endpoint = "taxi/predict", base_url = "http://127.0.0.1:8000"):
+def post_api_endpoint(payload, endpoint = "/", base_url = "http://127.0.0.1:8000"):
     url = urljoin(base_url, endpoint)
     response = requests.post(url, json=payload)
     
@@ -57,7 +57,7 @@ def get_travel_route(pickup, dropoff, pickup_timestamp):
     else:
         traffic = "Medium"
 
-    return distance, duration, traffic, end_address
+    return distance, duration, duration_in_traffic, traffic, end_address
 
 
 def get_weather(pickup_timestamp, end_address):
