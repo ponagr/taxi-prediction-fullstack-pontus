@@ -1,5 +1,5 @@
 import streamlit as st
-from taxipred.utils.helpers import read_api_endpoint, taxi_prediction_endpoint, autocomplete_addresses, get_travel_route, get_weather
+from taxipred.utils.helpers import read_api_endpoint, post_api_endpoint, autocomplete_addresses, get_travel_route, get_weather
 import pandas as pd
 from taxipred.utils.constants import FEATURE_MODEL_PATH
 import joblib
@@ -21,6 +21,8 @@ df = pd.DataFrame(data.json())
 # TODO: 4 hours, ta bort hours, och gör 4*60 för att göra till minuter, plussa med mins, gör detta för duration och duration_in traffic
 # TODO: lägg till gräns för datum
 # TODO: lägg till page för kund och page för företag, med enklare färdiga val via knappar utan apis
+# TODO: testa olika modeller för categorical_feature predictions
+# TODO: ta bort min och max värden i validering?
 
 def main():
     st.markdown("# Taxi Prediction Dashboard")
@@ -59,20 +61,24 @@ def main():
             "Per_Minute_Rate": float(Per_Minute_Rate),
             "Trip_Duration_Minutes": float(Trip_Duration_Minutes),
         }
-        response = taxi_prediction_endpoint(payload).json()
+        response = post_api_endpoint(payload, "taxi/predict").json()
         taxi_price = response.get("Predicted_Price")*usd_to_sek
         st.markdown(f"Predicted taxi price is {taxi_price:.2f} SEK")
         
         
-def predict_rates():
-    model = joblib.load(FEATURE_MODEL_PATH)
-    st.time_input()
+
+# TODO: skapa sida för att testa predictions på missing_target_data och fylla dess värden
+# Jämför denna med originalet och lägg till den fyllda missing_target_datan och kolla om dess mean/median ser likadan ut
 
 
+# TODO: skapa sida för företag, med enklare knappar(st.pills) och sliders för alla val, utan apis, skriv ut base och rates, samt totalt pris 
 
+
+# TODO: lite plots och metrics
+
+# Sida för "kund"
 def test():
     # karta här för att hitta adresser?
-    # with st.form("Taxi fare data"):
     cols = st.columns(3)
     
     with cols[0]:
@@ -102,35 +108,64 @@ def test():
         dropoff_addresses = autocomplete_addresses(dropoff_query)
         dropoff = st.selectbox("Choose drop off adress", dropoff_addresses)
     
-    st.write(dropoff)
-    # response = requests.get(f"https://api.openweathermap.org/data/2.5/forecast?q=Hägersten,se&appid={WEATHER_API_KEY}&units=metric")
     
     if pickup and dropoff:
-        # response = requests.get(f"https://maps.googleapis.com/maps/api/directions/json?origin={pickup}&destination={dropoff}&departure_time={pickup_timestamp}&key={GOOGLE_MAPS_API_KEY}")
-        # legs = response.json()["routes"][0]["legs"][0]
-        # end_address = legs["end_address"]
-        # legs = response.json()["routes"][0]["legs"][0]
-        # st.write(end_address.split(", ")[1])
-        # submitted = st.form_submit_button("PREDICT")
-        # if submitted:
-        distance, duration, traffic, end_address = get_travel_route(pickup, dropoff, pickup_timestamp)
+        
+        distance, normal_duration, duration, traffic, end_address = get_travel_route(pickup, dropoff, pickup_timestamp)
         weather = get_weather(pickup_timestamp, end_address)
-        st.write(weather)
-        #     payload = {
-        #         "Time_of_Day_Evening": 1 if 18 < time.hour < 24 else 0,
-        #         "Time_of_Day_Morning": 1 if 6 < time.hour < 12 else 0,
-        #         "Time_of_Day_Night": 1 if time.hour < 6 else 0,
-        #         "Day_of_Week_Weekend": 0 if day.isoweekday() < 6 else 1,
-        #         "Traffic_Conditions_Low": 1 if traffic == "Low" else 0,     
-        #         "Traffic_Conditions_Medium": 1 if traffic == "Medium" else 0,
-        #         "Weather_Rain": 1 if weather == "Rain" else 0,
-        #         "Weather_Snow": 1 if weather == "Snow" else 0
-        #     }
-        #     # predicta med denna payload, skriv sedan ut priser osv med nästa prediction
-        #     st.write(payload)
+
+        payload = {
+            "Time_of_Day_Evening": 1 if 18 < time.hour < 24 else 0,
+            "Time_of_Day_Morning": 1 if 6 < time.hour < 12 else 0,
+            "Time_of_Day_Night": 1 if time.hour < 6 else 0,
+            "Day_of_Week_Weekend": 0 if day.isoweekday() < 6 else 1,
+            "Traffic_Conditions_Low": 1 if traffic == "Low" else 0,     
+            "Traffic_Conditions_Medium": 1 if traffic == "Medium" else 0,
+            "Weather_Rain": 1 if weather == "Rain" else 0,
+            "Weather_Snow": 1 if weather == "Snow" else 0
+        }
+        # predicta med denna payload, skriv sedan ut priser osv med nästa prediction
+        response = post_api_endpoint(payload, "taxi/fares/predict").json()
+        Base_Fare = response.get("Base_Fare")
+        Per_Km_Rate = response.get("Per_Km_Rate")
+        Per_Minute_Rate = response.get("Per_Minute_Rate")
+        
+        if Base_Fare and Per_Km_Rate and Per_Minute_Rate:
+            
+            # skicka in payload med predicted base_fare, km_rate och minute_rate till nästa model
+            payload = {
+                "Trip_Distance_km": float(distance),
+                "Passenger_Count": float(Passenger_Count),
+                "Base_Fare": float(Base_Fare),
+                "Per_Km_Rate": float(Per_Km_Rate),
+                "Per_Minute_Rate": float(Per_Minute_Rate),
+                "Trip_Duration_Minutes": float(duration),
+            }
+            response = post_api_endpoint(payload, "taxi/predict").json()
+            usd_to_sek = 9.40   # 1 usd = 9.40 kr
+            taxi_price = response.get("Predicted_Price")*usd_to_sek
+            
+            # lite kontroll och jämförelser
+            base_fare_sek = round(Base_Fare*usd_to_sek, 2)
+            km_rate_sek = round(Per_Km_Rate*usd_to_sek, 2)
+            minute_rate_sek = round(Per_Minute_Rate*usd_to_sek, 2)
+            
+            distance_price_sek = round((Per_Km_Rate*distance)*usd_to_sek, 2)
+            duration_price_sek = round((Per_Minute_Rate*duration)*usd_to_sek, 2)
+            calculated_price = base_fare_sek+distance_price_sek+duration_price_sek
+            
+            st.markdown(f"{base_fare_sek= } | {km_rate_sek= } | {minute_rate_sek= } ")
+            st.markdown(f"{distance= } | {duration= } | {normal_duration= }")
+            st.markdown(f"{weather= } | {traffic= }")
+            st.markdown(f"{distance_price_sek= } | {duration_price_sek= }")
+            st.markdown(f"{calculated_price= }")
+            st.markdown(f"Predicted taxi price is {taxi_price:.2f} SEK")
+            
+            # TODO: visa karta med rutt tillsammans med predicted price efter prediction
+        
+        
 
     
-        # skicka in payload till model
         
 
     
