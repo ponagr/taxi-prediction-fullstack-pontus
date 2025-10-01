@@ -38,20 +38,21 @@ def autocomplete_addresses(query):
 
 
 def get_travel_route(pickup, dropoff, pickup_timestamp):
-    
-    # traffic, distance, duration = requests.get()  - skicka med datum och tid?
     response = requests.get(f"https://maps.googleapis.com/maps/api/directions/json?origin={pickup}&destination={dropoff}&departure_time={pickup_timestamp}&key={GOOGLE_MAPS_API_KEY}")
 
     legs = response.json()["routes"][0]["legs"][0]
+    # hämta ut distance via distance["text"] och ta bort km för att kunna konvertera
     distance = float(legs["distance"]["text"].strip(" km"))
-    # 4 hours, ta bort hours, och gör 4*60 för att göra till minuter, plussa med mins, gör detta för duration och duration_in traffic
-    duration = float(legs["duration"]["text"].strip(" mins"))
-    duration_in_traffic = float(legs["duration_in_traffic"]["text"].strip(" mins"))
+    # skicka in text för duration och duration_in_traffic i parse_duration för att räkna ut allt i endast minuter
+    duration = parse_duration(legs["duration"]["text"])
+    duration_in_traffic = parse_duration(legs["duration_in_traffic"]["text"])
+    # hämta ut end_address för att använda till väder api, då den valda addressen ibland inte innehåller själva staden, men det gör end_address
     end_address = legs["end_address"]
     
-    if duration_in_traffic < duration:
+    duration_diff = duration_in_traffic - duration
+    if duration_diff < 0:
         traffic = "Low"
-    elif duration_in_traffic > duration:
+    elif duration_diff > 2:
         traffic = "High"
     else:
         traffic = "Medium"
@@ -59,11 +60,44 @@ def get_travel_route(pickup, dropoff, pickup_timestamp):
     return distance, duration, duration_in_traffic, traffic, end_address
 
 
+# för att dela upp duration och duration_in_traffic och räkna ut dagar, timmar och minuter till endast minuter
+def parse_duration(text):
+    # splita på alla mellanslag
+    # då blir varannat element en siffra och varannat element en enhet(day, hour, min)
+    x = text.split()
+
+    minutes = 0
+    # loopa igenom varannat element
+    for i in range(0, len(x), 2):
+        # dela upp första och andra elementet i värde och enhet
+        value = float(x[i])
+        unit = x[i+1]
+        
+        # kontrollera om enheten är day, hour eller min, och konvertera detta till minuter
+        if "day" in unit:
+            minutes += value*24*60
+        elif "hour" in unit:
+            minutes += value*60
+        elif "min" in unit:
+            minutes += value
+
+    # returnera totalen av alla värden i minuter
+    return minutes
+
+
 def get_weather(pickup_timestamp, end_address):
+    # hämta ut stad från den valda adressen genom att splitta på ','
+    # första elementet är address, andra elementet är stad, och sista är land (Kungsportsavenyen, Gothenburg, Sweden)
+    # hämta då ut andra elementet och skicka in för att få väder för den valda staden
     city = end_address.split(", ")[1]
+    city = city.split()[-1]
+
     response = requests.get(f"https://api.openweathermap.org/data/2.5/forecast?q={city},se&appid={WEATHER_API_KEY}&units=metric")
     
     data = response.json()
+
+    # jämför alla datetimes i väder responsen med pickup_timestamp som användaren valt
+    # och välj resultatet som är lägst(så nära 0 som möjligt)
     closest = min(data["list"], key=lambda x: abs(x["dt"] - pickup_timestamp))
 
     return closest["weather"][0]["main"]
