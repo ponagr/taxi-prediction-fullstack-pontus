@@ -100,5 +100,7 @@ if button:
             st.markdown(f"{distance_price_sek= } | {duration_price_sek= }")
             st.markdown(f"{calculated_price= }")
             st.markdown(f"Predicted taxi price is {taxi_price:.2f} SEK")
+            
+            # TODO: visa karta med rutt tillsammans med predicted price efter prediction
     else:
         st.warning("You need to choose pickup and drop off address first")
