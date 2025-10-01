@@ -17,6 +17,14 @@ taxi_data = TaxiData()
 async def read_taxi_data():
     return taxi_data.to_json()
 
+@app.get("/taxi/original")
+async def read_original_taxi_data():
+    return taxi_data.original_to_json()
+
+@app.get("/taxi/missing_target")
+async def read_missing_target_data():
+    return taxi_data.missing_target_to_json()
+
 
 @app.post("/taxi/predict", response_model=PredictionResponse)
 async def predict_taxi_price(payload: TaxiInput):
