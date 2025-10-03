@@ -36,18 +36,24 @@ def autocomplete_addresses(query):
 
     return description
 
+def get_map(pickup, dropoff):
+    return f"https://www.google.com/maps/embed/v1/directions?key={GOOGLE_MAPS_API_KEY}&origin={pickup}&destination={dropoff}&mode=driving"
+
 
 def get_travel_route(pickup, dropoff, pickup_timestamp):
     response = requests.get(f"https://maps.googleapis.com/maps/api/directions/json?origin={pickup}&destination={dropoff}&departure_time={pickup_timestamp}&key={GOOGLE_MAPS_API_KEY}")
 
     legs = response.json()["routes"][0]["legs"][0]
-    # hämta ut distance via distance["text"] och ta bort km för att kunna konvertera
-    distance = float(legs["distance"]["text"].strip(" km"))
-    # skicka in text för duration och duration_in_traffic i parse_duration för att räkna ut allt i endast minuter
-    duration = parse_duration(legs["duration"]["text"])
-    duration_in_traffic = parse_duration(legs["duration_in_traffic"]["text"])
+
+    # convert distance and duration values from m and s to km and min
+    distance = float(round(legs["distance"]["value"]/1000))
+    duration = float(round(legs["duration"]["value"]/60))
+    duration_in_traffic = float(round(legs["duration_in_traffic"]["value"]/60))
     # hämta ut end_address för att använda till väder api, då den valda addressen ibland inte innehåller själva staden, men det gör end_address
     end_address = legs["end_address"]
+    print(distance)
+    print(duration)
+    print(duration_in_traffic)
     
     duration_diff = duration_in_traffic - duration
     if duration_diff < 0:
@@ -59,6 +65,22 @@ def get_travel_route(pickup, dropoff, pickup_timestamp):
 
     return distance, duration, duration_in_traffic, traffic, end_address
 
+
+def parse_distance(text):
+    x = text.replace(",", "").split()
+    
+    distance_km = 0
+    
+    for i in range(0, len(x), 2):
+        value = float(x[i])
+        unit = x[i+1]
+        
+        if unit == "m":
+            distance_km += value/1000
+        if unit == "km":
+            distance_km += value
+    
+    return distance_km
 
 # för att dela upp duration och duration_in_traffic och räkna ut dagar, timmar och minuter till endast minuter
 def parse_duration(text):
