@@ -34,6 +34,14 @@ class TaxiInput(BaseModel):
     Per_Minute_Rate: float = Field(ge=0.1, le=0.5)
     Trip_Duration_Minutes: float = Field(ge=5, le=120)
 
+class TaxiInputElastic(BaseModel):
+    Trip_Distance_km: float 
+    Passenger_Count: float 
+    Base_Fare: float 
+    Per_Km_Rate: float 
+    Per_Minute_Rate: float
+    Trip_Duration_Minutes: float 
+
 
 class PredictionResponse(BaseModel):
     Predicted_Price: float
