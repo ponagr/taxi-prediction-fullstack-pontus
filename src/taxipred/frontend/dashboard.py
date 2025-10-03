@@ -2,7 +2,9 @@ import streamlit as st
 
 
 st.set_page_config(layout="wide", page_title="Taxi Prediction Dashboard")
+
 st.title("Page Descriptions")
+
 st.markdown("### Overview Page:")
 st.markdown("***Overview of the data used for model training***")
 
@@ -14,11 +16,14 @@ st.markdown("***Simple analysis for a taxi company to test different parameters 
 
 
 # TODO: lägg till rolig bakgrund
-# TODO: flytta över kod till funktioner
 # TODO: lägga in datan med missing values på Taxi_Price för att kunna klicka på och fylla värden från dashboarden
-# TODO: skapa sida för att testa predictions på missing_target_data och fylla dess värden
 # TODO: testa olika modeller för categorical_feature predictions
 # TODO: lite plots och metrics
+# TODO: fyll missing values med random forest, jämför med tidigare cleaned och original df
+# TODO: sida för att se och jämföra datasets, med describe
+# TODO: sida för att testa predictions på missing_target_data och fylla dess värden och jämföra dess description värden med originalet
+# TODO: fixa till readme
+
 
 
 # def main():
