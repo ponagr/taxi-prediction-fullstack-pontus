@@ -17,8 +17,8 @@ git clone https://github.com/ponagr/taxi-prediction-fullstack-pontus.git
 uv venv && source venv/Scripts/activate && uv pip install . && uv pip install -r requirements.txt
 ```
 
-***3. Get API keys for google maps and openweathermap and setup .env***
-https://developers.google.com/maps
+***3. Get API keys for google maps and openweathermap and setup .env***    
+https://developers.google.com/maps    
 https://home.openweathermap.org/users/sign_up
 ```bash
 touch .env
