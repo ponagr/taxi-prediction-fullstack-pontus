@@ -36,6 +36,7 @@ def autocomplete_addresses(query):
 
     return description
 
+
 def get_map(pickup, dropoff):
     return f"https://www.google.com/maps/embed/v1/directions?key={GOOGLE_MAPS_API_KEY}&origin={pickup}&destination={dropoff}&mode=driving"
 
@@ -51,9 +52,6 @@ def get_travel_route(pickup, dropoff, pickup_timestamp):
     duration_in_traffic = float(round(legs["duration_in_traffic"]["value"]/60))
     # hämta ut end_address för att använda till väder api, då den valda addressen ibland inte innehåller själva staden, men det gör end_address
     end_address = legs["end_address"]
-    print(distance)
-    print(duration)
-    print(duration_in_traffic)
     
     duration_diff = duration_in_traffic - duration
     if duration_diff < 0:
@@ -64,47 +62,6 @@ def get_travel_route(pickup, dropoff, pickup_timestamp):
         traffic = "Medium"
 
     return distance, duration, duration_in_traffic, traffic, end_address
-
-
-def parse_distance(text):
-    x = text.replace(",", "").split()
-    
-    distance_km = 0
-    
-    for i in range(0, len(x), 2):
-        value = float(x[i])
-        unit = x[i+1]
-        
-        if unit == "m":
-            distance_km += value/1000
-        if unit == "km":
-            distance_km += value
-    
-    return distance_km
-
-# för att dela upp duration och duration_in_traffic och räkna ut dagar, timmar och minuter till endast minuter
-def parse_duration(text):
-    # splita på alla mellanslag
-    # då blir varannat element en siffra och varannat element en enhet(day, hour, min)
-    x = text.split()
-
-    minutes = 0
-    # loopa igenom varannat element
-    for i in range(0, len(x), 2):
-        # dela upp första och andra elementet i värde och enhet
-        value = float(x[i])
-        unit = x[i+1]
-        
-        # kontrollera om enheten är day, hour eller min, och konvertera detta till minuter
-        if "day" in unit:
-            minutes += value*24*60
-        elif "hour" in unit:
-            minutes += value*60
-        elif "min" in unit:
-            minutes += value
-
-    # returnera totalen av alla värden i minuter
-    return minutes
 
 
 def get_weather(pickup_timestamp, end_address):

@@ -1,8 +1,10 @@
 import streamlit as st
 from taxipred.utils.helpers import post_api_endpoint, autocomplete_addresses, get_travel_route, get_weather, get_map
 import datetime
+from taxipred.frontend.background import add_background 
 
 st.set_page_config(layout="wide", page_title="Customer Page")
+add_background()
 
 st.title("Customer Page")
 
@@ -38,15 +40,6 @@ with cols[2]:
 button = st.button("Predict")
 if button:
     if pickup and dropoff:
-    # fixed parsing of longer trips, but predictions is not accurate outside of the range of data used for training the prediction model:
-        # base_fare_sek= 34.76 | km_rate_sek= 12.14 | minute_rate_sek= 3.1
-        # distance= 460.0 | duration= 297.0 | normal_duration= 290.0
-        # weather= 'Rain' | traffic= 'High'
-        # distance_price_sek= 5585.89 | duration_price_sek= 919.32
-        # calculated_price= 6539.97
-        # Predicted taxi price is 832.29 SEK
-    # ingen ide att ta bort Field och gräns för inputvärden från pydantic klasserna, då predictions blir felaktiga
-    
         distance, normal_duration, duration, traffic, end_address = get_travel_route(pickup, dropoff, pickup_timestamp)
         weather = get_weather(pickup_timestamp, end_address)
 

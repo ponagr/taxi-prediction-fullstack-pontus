@@ -7,6 +7,9 @@ import os
 # 'joinpath' skapar sedan en sökväg inne i paketet
 # och vår Traversable(resultatet) ser ut såhär: <project-root>/src/taxipred/data/taxi_trip_pricing.csv
 
+# ASSET PATH
+IMG_PATH = files("taxipred").joinpath("assets/taxi_img.png")
+
 # CSV PATHS
 TAXI_ORIGINAL_PATH = files("taxipred").joinpath("data/taxi_trip_pricing.csv")
 TAXI_CSV_PATH = files("taxipred").joinpath("data/cleaned_taxi_data.csv")

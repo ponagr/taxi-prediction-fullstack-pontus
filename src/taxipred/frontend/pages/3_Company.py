@@ -1,5 +1,6 @@
 import streamlit as st
 from taxipred.utils.helpers import post_api_endpoint
+from taxipred.utils.constants import IMG_PATH
 
 st.set_page_config(layout="wide", page_title="Company Page")
 
@@ -16,6 +17,7 @@ day = col2.pills("Day of week", ["Weekday", "Weekend"], default="Weekday")
 traffic = col1.pills("Traffic conditions", ["Low", "Medium", "High"], default="Low")
 
 weather = col2.pills("Weather", ["Clear", "Rain", "Snow"], default="Clear")
+col3.image(IMG_PATH)
 
 rates_payload = {
     "Time_of_Day_Evening": 1 if time == "Evening" else 0,
