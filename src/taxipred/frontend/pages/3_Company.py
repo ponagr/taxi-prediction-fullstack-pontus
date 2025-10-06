@@ -4,7 +4,7 @@ from taxipred.utils.helpers import post_api_endpoint
 st.set_page_config(layout="wide", page_title="Company Page")
 
 st.title("Company Page")
-# TODO: flytta över kod till funktioner
+
 usd_to_sek = 9.40   # 1 usd = 9.40 kr
 sek_to_usd = 1 / usd_to_sek   
 

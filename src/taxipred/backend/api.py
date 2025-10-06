@@ -8,10 +8,6 @@ app = FastAPI()
 
 taxi_data = TaxiData()
 
-# TODO: konvertera alla värden från USD till SEK?
-# TODO: göra om passenger count till int?
-# TODO: lägga in datan med missing values på Taxi_Price för att kunna klicka på och fylla värden från dashboarden
-# TODO: lägga till upphämtningsplats och avlämningsplats, koppla till nån api för maps, och automatiskt fylla i uppskattad distance och duration, endast fylla i rate per min/km, base fare och antal passagerare 
 
 @app.get("/taxi/")
 async def read_taxi_data():

@@ -9,7 +9,7 @@ import os
 
 # CSV PATHS
 TAXI_ORIGINAL_PATH = files("taxipred").joinpath("data/taxi_trip_pricing.csv")
-TAXI_CSV_PATH = files("taxipred").joinpath("data/taxi_trip_pricing_cleaned_no_categorical.csv")
+TAXI_CSV_PATH = files("taxipred").joinpath("data/cleaned_taxi_data.csv")
 TAXI_MISSING_TARGET_PATH = files("taxipred").joinpath("data/missing_target_data.csv")
 
 # MODEL PATHS
