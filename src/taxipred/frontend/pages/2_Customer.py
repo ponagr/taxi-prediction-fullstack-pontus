@@ -111,7 +111,6 @@ if button:
                 
             # visa karta med rutt tillsammans med predicted price efter prediction
             with col1:
-                st.info(distance, duration)
                 map = get_map(pickup, dropoff)
                 st.components.v1.html(
                     f'<iframe src="{map}" width="700" height="500" style="border:0;" allowfullscreen="" loading="lazy"></iframe>',

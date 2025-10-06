@@ -15,11 +15,9 @@ TAXI_MISSING_TARGET_PATH = files("taxipred").joinpath("data/missing_target_data.
 # MODEL PATHS
 TAXI_MODEL_PATH = files("taxipred").joinpath("models/taxi_regressor.joblib")
 FEATURE_MODEL_PATH = files("taxipred").joinpath("models/feature_price_multiregressor.joblib")
-
 ELASTIC_MODEL_PATH = files("taxipred").joinpath("models/elastic_regressor.joblib")
 
-
-# API KEY
+# API KEYS
 load_dotenv()
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API")
 WEATHER_API_KEY = os.getenv("WEATHER_API")
