@@ -5,11 +5,6 @@ from pydantic import BaseModel, Field
 from typing import Literal
 
 
-
-# TODO: lägga in datan med missing values på Taxi_Price för att kunna klicka på och fylla värden från dashboarden
-# TODO: räkna ut procent score för model prediction, med rmse delat på medelvärde på nått sätt?
-# TODO: tvätta datan med lite mer random diff på mean och median
-
 class TaxiData:
     def __init__(self):
         self.df = pd.read_csv(TAXI_CSV_PATH, index_col=0)
