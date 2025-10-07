@@ -24,9 +24,56 @@ For Resekollen AB, the project represents a step toward becoming a complete plat
 
 ### Data Structure:
 
+```plaintext
+taxi-prediction/
+│
+├── .env                                  # Environment variables (API keys for Google Maps & OpenWeatherMap)
+├── requirements.txt                      # Python dependencies required for the project
+├── setup.py                              # Installation script for packaging and running the project
+├── lab_taxipred.pdf                      # Lab documentation
+│
+├── explorations/                         # Jupyter notebooks for data exploration, testing & model development
+│   ├── model_testing.py                  # Helper file, with functions for testing and evaluating different models on given dataset
+│   ├── 1_eda.ipynb                       # Exploratory Data Analysis (EDA)
+│   ├── 2_data_cleaning.ipynb             # Data cleaning and preprocessing
+│   └── 3_model_exporting.ipynb           # Model training and exporting
+│
+└── src/
+    └── taxipred/
+        │
+        ├── assets/
+        │   └── taxi_img.png              # Dashboard background image
+        │
+        ├── backend/                      # API and data processing logic
+        │   ├── api.py                    # FastAPI endpoints for model predictions
+        │   └── data_processing.py        # Pydantic classes for validating data
+        │
+        ├── data/                         # Local CSV datasets used for model training and testing
+        │   ├── cleaned_taxi_data.csv
+        │   ├── missing_target_data.csv
+        │   ├── taxi_trip_pricing.csv
+        │   ├── taxi_trip_pricing_cleaned.csv
+        │   └── taxi_trip_pricing_cleaned_categorical.csv
+        │
+        ├── frontend/                     # Streamlit-based dashboard (UI)
+        │   ├── background.py             # Background picture
+        │   ├── dashboard.py              # Main Streamlit entry file
+        │   └── pages/                    # Streamlit multipage structure
+        │       ├── 1_Overview.py         # Overview of data and model testing
+        │       ├── 2_Customer.py         # Customer page for predicting taxi prices
+        │       └── 3_Company.py          # Company analytics and insights
+        │
+        ├── models/                       # Saved machine learning models (.joblib)
+        │   ├── elastic_regressor.joblib
+        │   ├── feature_price_multiregressor.joblib
+        │   └── taxi_regressor.joblib
+        │
+        └── utils/                        # Utility and helper functions
+            ├── constants.py              # Global data paths for API-keys, models, csv files etc
+            └── helpers.py                # Helper functions for post and get API-requests to different urls
+```
 
 ## Steps for setting up and running the application:
-
 ### Setup
 ***1. Clone the repository***
 ```bash
@@ -68,20 +115,17 @@ cd src/taxipred/frontend && streamlit run dashboard.py
 
 ## Insights from the EDA, Data Cleaning and Model Selection
 
-I did a lot of different testing, comparisons, evaluations on different models and scalers with different datasets(different imputations) and columns and comparing the results.
+During the exploratory and model development phase, I performed extensive testing, comparisons, and evaluations of various models and scalers using multiple datasets (with different imputations and feature sets). To streamline the process, I created helper functions for faster testing and model comparisons.
 
-Created functions for easier testing and comparisons of the different models and datasets.
+After several experiments, I decided to use only the numerical features for cleaning and model training, since the categorical features collectively contributed less than 1% to the overall feature importance.
 
-I decided to only use the numerical features and drop the categorical ones for the cleaning and model training, since the categorical features summed together didnt even make up for 1% in the feature_importance.
+The **RandomForestRegressor** consistently achieved the best performance across all datasets.
+The highest accuracy was obtained with the dataset where missing values were **imputed using RandomForestRegressor predictions**, rather than mean or median imputation.
 
-RandomForestRegressor had best performance for all the datasets.
+Hyperparameter tuning of the Random Forest model did not yield any significant performance improvements.
 
-The best performance was with the dataset where i filled missing values using predictions from RandomForestRegressor instead of using mean/median to fill the values.
+For experimentation, I also created a separate **MultiOutput** model to predict **Base Fare** and **Rates per km/minute** using the categorical features. While it doesn’t perform particularly well, it was an interesting exercise to include them in some way.
 
-No clear performance boost by tuning hyperparameters in the RF model.
-
-Also created a model for predicting Base Fare and Rates for km and minutes based on the categorical features to include and make use of them just for fun, it doesnt perform too well tho.
-
-And an ElasticCV model for linear regression to use for predicting prices outside the bounds of the data used for training.
+Lastly, an **ElasticCV** linear regression model was trained to predict prices outside the bounds of the main training data, allowing for more robust extrapolation in rare cases.
 
 
