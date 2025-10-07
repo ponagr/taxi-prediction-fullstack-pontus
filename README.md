@@ -1,7 +1,28 @@
 # Labb AI Engineering 1 - taxi predictions
 
 ### Project explanation:
-Taxi Prediction is a full-stack application that combines machine learning, backend, and frontend to predict taxi fares in real time. Through an API layer, the system is scalable, flexible, and easy to integrate with other services. The solution helps users make smarter decisions, plan their trips, and avoid unexpected costs. For Resekollen AB, the project represents a step toward becoming a complete platform for travel planning and future mobility.
+Taxi Prediction is a full-stack application that combines machine learning, backend, and frontend to predict taxi fares in real time. 
+Through an API layer, the system is scalable, flexible, and easy to integrate with other services. 
+The solution helps users make smarter decisions, plan their trips, and avoid unexpected costs. 
+For Resekollen AB, the project represents a step toward becoming a complete platform for travel planning and future mobility.
+
+### Dataset:
+**Suitable for regression analysis and feature engineering exercises.**
+- **Description:**
+	- This dataset is designed to predict taxi trip fares based on various factors such as distance, time of day, traffic conditions, and more. It provides realistic synthetic data for regression tasks, offering a unique opportunity to explore pricing trends in the taxi industry.
+- **Features:**
+	- Distance (in kilometers): The length of the trip.
+	- Pickup Time: The starting time of the trip.
+	- Dropoff Time: The ending time of the trip.
+	- Traffic Condition: Categorical indicator of traffic (light, medium, heavy).
+	- Passenger Count: Number of passengers for the trip.
+	- Weather Condition: Categorical data for weather (clear, rain, snow).
+	- Trip Duration (in minutes): Total trip time.
+	- Fare Amount (target): The cost of the trip (in USD).
+- **Application:**
+	- Predicting taxi fares based on distance, traffic, and weather.
+
+### Data Structure:
 
 
 ## Steps for setting up and running the application:
