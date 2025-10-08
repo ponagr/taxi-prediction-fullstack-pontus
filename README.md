@@ -82,14 +82,14 @@ git clone https://github.com/ponagr/taxi-prediction-fullstack-pontus.git
 
 ***2. Install dependencies***
 ```bash
-uv venv && source venv/Scripts/activate && uv pip install .
+uv venv && source .venv/Scripts/activate && uv pip install .
 ```
 
 ***3. Get API keys for google maps and openweathermap and setup .env***    
 https://developers.google.com/maps    
 https://home.openweathermap.org/users/sign_up
 ```bash
-touch .env && echo "WEATHER_API=your_weather_api_key" >> .env && echo "GOOGLE_MAPS_API=your_google_api_key" >> .env
+touch .env && echo "GOOGLE_MAPS_API=your_google_api_key" >> .env && echo "WEATHER_API=your_weather_api_key" >> .env
 ```
 
 ### Run application
